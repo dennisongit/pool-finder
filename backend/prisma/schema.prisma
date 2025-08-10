@@ -1,0 +1,55 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  phone     String?
+  verified  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  pools     Pool[]
+  contacts  Contact[]
+
+  @@map("users")
+}
+
+model Pool {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  address     String
+  latitude    Float
+  longitude   Float
+  amenities   String[]
+  isPublic    Boolean  @default(true)
+  ownerId     String
+  owner       User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  contacts    Contact[]
+
+  @@map("pools")
+}
+
+model Contact {
+  id      String @id @default(cuid())
+  name    String
+  email   String
+  phone   String?
+  message String
+  poolId  String?
+  pool    Pool?  @relation(fields: [poolId], references: [id], onDelete: SetNull)
+  userId  String?
+  user    User?  @relation(fields: [userId], references: [id], onDelete: SetNull)
+  createdAt DateTime @default(now())
+
+  @@map("contacts")
+}
